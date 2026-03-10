@@ -31,6 +31,20 @@ except Exception as e:
     print("LED init error:", e)
     led = None
 
+# --- HELPER: blink LED ---
+def blink_led(times=1, duration=0.1):
+    """Blink the onboard LED a number of times.
+    times: how many on/off cycles
+    duration: seconds each state lasts
+    """
+    if not led:
+        return
+    for _ in range(times):
+        led.value = True
+        time.sleep(duration)
+        led.value = False
+        time.sleep(duration)
+
 # --- HID KEYBOARD ---
 keyboard = Keyboard(usb_hid.devices)
 layout = KeyboardLayoutUS(keyboard)
@@ -137,7 +151,5 @@ while True:
                 print("ERROR:", e)
                 uart.write(b'{"status":"invalid_json"}\n')
 
-    # Blink LED to indicate code is running
-    if led:
-        led.value = not led.value
-    time.sleep(0.5)
+    # small pause to avoid busy-wait
+    time.sleep(0.1)
