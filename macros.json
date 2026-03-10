@@ -1,4 +1,12 @@
 {
+  "bootup_sequence": [
+    {"type": "hotkey", "keys": ["GUI", "R"]},
+    {"type": "delay", "seconds": 1.0},
+    {"type": "write", "text": "bootup sequence"},
+    {"type": "delay", "seconds": 1.0},
+    {"type": "press", "key": "ESCAPE"},
+    {"type": "delay", "seconds": 10.0}
+  ],
   "shutdown": [
     {"type": "hotkey", "keys": ["GUI", "R"]},
     {"type": "delay", "seconds": 0.2},

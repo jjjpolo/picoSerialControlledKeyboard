@@ -161,6 +161,12 @@ led_state = False
 jiggle_timer = time.monotonic()
 jiggle_state = False
 
+# Execute boot macro if configured
+boot_macro = config.get("boot_macro")
+if boot_macro:
+    print(f"Executing boot macro: {boot_macro}")
+    run_macro(boot_macro)
+
 while True:
     chunk = uart.read()
     if chunk:

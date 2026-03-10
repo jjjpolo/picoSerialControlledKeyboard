@@ -127,6 +127,20 @@ This project includes a configurable mouse jiggler feature. When enabled, the Pi
 
 No serial command is needed; the jiggler runs automatically if enabled in the config.
 
+## Boot Macro (Run Macro at Startup)
+
+You can configure the Pico to automatically run a macro once at startup. This is useful for sending a specific key sequence or command as soon as the device boots.
+
+- In your `config.json`, set the `boot_macro` key to the name of a macro defined in `macros.json`:
+  ```json
+  {
+    "mouse_jiggler_enabled": true,
+    "boot_macro": "bootup_sequence"
+  }
+  ```
+- The macro will be executed only once, right after the code starts and before entering the main loop.
+- To disable this feature, set `"boot_macro": null` or remove the key.
+
 ## Troubleshooting
 - If macros or hotkeys don't work, check your key names in `macros.json`.
 - Make sure your serial terminal sends a newline (\n) at the end of each command.

@@ -1,3 +1,5 @@
 {
-  "mouse_jiggler_enabled": true
+  "mouse_jiggler_enabled": true,
+  "_boot_macro": "bootup_sequence",
+  "boot_macro": null
 }
