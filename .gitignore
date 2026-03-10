@@ -128,3 +128,15 @@ dmypy.json
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+install_manifest.txt
+build.ninja
+.ninja_log
+.ninja_deps
+build/
+_builds/

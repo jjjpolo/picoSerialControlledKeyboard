@@ -1,5 +1,6 @@
 import board
 import busio
+import digitalio
 import json
 import time
 import usb_hid
@@ -20,6 +21,15 @@ except Exception as e:
 
 # --- UART CONFIG ---
 uart = busio.UART(board.GP0, board.GP1, baudrate=115200, timeout=0.1) // RX=GP0, TX=GP1
+
+# --- LED for testing ---
+try:
+    led = digitalio.DigitalInOut(board.GP25)
+    led.direction = digitalio.Direction.OUTPUT
+    print("LED initialized on GP25")
+except Exception as e:
+    print("LED init error:", e)
+    led = None
 
 # --- HID KEYBOARD ---
 keyboard = Keyboard(usb_hid.devices)
@@ -96,6 +106,7 @@ def handle_command(data):
 
 # --- MAIN LOOP ---
 buffer = b""
+print("=== Pico Serial Keyboard Started ===")
 
 while True:
     chunk = uart.read()
@@ -125,3 +136,8 @@ while True:
             except Exception as e:
                 print("ERROR:", e)
                 uart.write(b'{"status":"invalid_json"}\n')
+
+    # Blink LED to indicate code is running
+    if led:
+        led.value = not led.value
+    time.sleep(0.5)
