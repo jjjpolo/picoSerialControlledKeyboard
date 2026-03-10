@@ -190,7 +190,7 @@ while True:
                 print("ERROR:", e)
                 uart.write(b'{"status":"invalid_json"}\n')
 
-    # non-blocking LED toggle every 1 second
+    # Non-blocking LED heartbeat every 1 second
     now = time.monotonic()
     if now - led_timer >= 1.0:
         if led:
@@ -200,14 +200,18 @@ while True:
 
     # Mouse jiggler: move mouse right then left every 60 seconds
     if config.get("mouse_jiggler_enabled", True):
-        now = time.monotonic()
         if now - jiggle_timer >= 60.0:
             if mouse:
+                # Save LED state to restore heartbeat after jiggler blinks
+                prev_led_state = led.value if led else False
                 mouse.move(2, 0)  # move right
                 time.sleep(0.05)
                 mouse.move(-2, 0) # move left
                 print("Mouse jiggled right and left")
-                blink_led(times=3, duration=0.05)  # quick LED blink to indicate jiggling
+                blink_led(times=3, duration=0.08)  # blink 3 times for jiggler
+                # Restore LED state so heartbeat pattern is not affected
+                if led:
+                    led.value = prev_led_state
             jiggle_timer = now
 
     # small pause to avoid busy-wait
