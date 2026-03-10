@@ -1,0 +1,12 @@
+{
+  "shutdown_windows": [
+    {"type": "hotkey", "keys": ["WINDOWS"]},
+    {"type": "delay", "seconds": 0.2},
+    {"type": "write", "text": "shutdown /s /t 0"},
+    {"type": "delay", "seconds": 0.1},
+    {"type": "press", "key": "ENTER"}
+  ],
+  "abrir_terminal": [
+    {"type": "hotkey", "keys": ["CTRL", "ALT", "T"]}
+  ]
+}
