@@ -8,6 +8,7 @@ import usb_hid
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keycode import Keycode
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+from adafruit_hid.mouse import Mouse
 
 __version__ = "1.0.0 - DEV"
 
@@ -18,6 +19,14 @@ try:
 except Exception as e:
     print("Error loading macros:", e)
     macros = {}
+
+# Load config from JSON
+try:
+    with open("config.json", "r") as f:
+        config = json.load(f)
+except Exception as e:
+    print("Error loading config:", e)
+    config = {"mouse_jiggler_enabled": True}
 
 # --- UART CONFIG ---
 uart = busio.UART(board.GP0, board.GP1, baudrate=115200, timeout=0.01)  # RX=GP0, TX=GP1
@@ -148,6 +157,10 @@ print("=== Pico Serial Keyboard Started ===")
 led_timer = time.monotonic() # Monotonic timer for non-blocking LED toggle
 led_state = False
 
+# Mouse jiggler timing
+jiggle_timer = time.monotonic()
+jiggle_state = False
+
 while True:
     chunk = uart.read()
     if chunk:
@@ -184,6 +197,18 @@ while True:
             led_state = not led_state
             led.value = led_state
         led_timer = now
+
+    # Mouse jiggler: move mouse right then left every 60 seconds
+    if config.get("mouse_jiggler_enabled", True):
+        now = time.monotonic()
+        if now - jiggle_timer >= 60.0:
+            if mouse:
+                mouse.move(2, 0)  # move right
+                time.sleep(0.05)
+                mouse.move(-2, 0) # move left
+                print("Mouse jiggled right and left")
+                blink_led(times=3, duration=0.05)  # quick LED blink to indicate jiggling
+            jiggle_timer = now
 
     # small pause to avoid busy-wait
     time.sleep(0.01)

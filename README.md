@@ -112,6 +112,21 @@ You can control the Pico by sending JSON commands over UART (GP0/GP1, 115200 bau
 - For Windows key, use `"GUI"`. For Ctrl, use `"LEFT_CONTROL"` or `"RIGHT_CONTROL"`.
 - All key names must match those in [adafruit_hid.keycode.Keycode](https://circuitpython.readthedocs.io/projects/hid/en/latest/api.html#adafruit_hid.keycode.Keycode).
 
+## Mouse Jiggler (Prevent Sleep)
+
+This project includes a configurable mouse jiggler feature. When enabled, the Pico will move the mouse cursor right and then left by 2 pixels every 60 seconds. This subtle movement prevents your computer from locking or going to sleep due to inactivity, without disturbing your work.
+
+- The jiggler is controlled by the `config.json` file:
+  ```json
+  {
+    "mouse_jiggler_enabled": true
+  }
+  ```
+- Set `mouse_jiggler_enabled` to `false` to disable the feature.
+- Make sure `adafruit_hid/mouse.py` is present in your Pico's `lib/` folder.
+
+No serial command is needed; the jiggler runs automatically if enabled in the config.
+
 ## Troubleshooting
 - If macros or hotkeys don't work, check your key names in `macros.json`.
 - Make sure your serial terminal sends a newline (\n) at the end of each command.
