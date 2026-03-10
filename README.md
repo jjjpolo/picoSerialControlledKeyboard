@@ -1,6 +1,17 @@
 # Pico Serial Controlled Keyboard
 
-A CircuitPython project for controlling a keyboard via serial on Raspberry Pi Pico.
+This project turns a Raspberry Pi Pico into a programmable USB keyboard that is controlled by serial commands. The Pico receives commands over UART (serial) and translates them into USB keyboard actions on the connected computer.
+
+## What is this for?
+- **Automate keyboard input**: Send keystrokes, hotkeys, or macros to a PC or other USB host.
+- **Remote control**: Use another device (like an ESP32, Arduino, or any microcontroller with UART) to send commands to the Pico, which then acts as a USB keyboard.
+- **Server integration**: For example, an ESP device can run a web server or REST API, receive HTTP requests, and convert those into serial commands for the Pico. The Pico then performs the requested keyboard actions on the host computer.
+- **Testing, automation, accessibility, or IoT**: Useful for kiosks, automated testing, accessibility devices, or any project where you want to control a computer via serial or networked commands.
+
+## How it works
+- The Pico runs CircuitPython and listens for JSON-formatted commands on its UART (default: GP0/GP1, 115200 baud).
+- When a valid command is received, the Pico executes the corresponding keyboard action (type text, press hotkeys, or run macros defined in `macros.json`).
+- The Pico appears as a standard USB keyboard to the host computer.
 
 ## Prerequisites
 

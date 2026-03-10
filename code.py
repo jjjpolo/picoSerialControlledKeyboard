@@ -66,7 +66,7 @@ def send_hotkey(keys):
         try:
             keycodes.append(getattr(Keycode, k))
         except AttributeError:
-            print("Key no reconocida:", k)
+            print("Unrecognized key:", k)
             return False
 
     for kc in keycodes:
@@ -96,7 +96,7 @@ def execute_sequence(actions):
                     keyboard.press(kc)
                     keyboard.release_all()
                 except AttributeError:
-                    print("Key not recognized:", key)
+                    print("Unrecognized key:", key)
             else:
                 print("Keyboard not initialized")
         elif action_type == "delay":
@@ -111,7 +111,7 @@ def run_macro(name):
         execute_sequence(macros[name])
         return True
     else:
-        print("Macro desconocida:", name)
+        print("Unknown macro:", name)
         return False
 
 # --- Command Router ---
@@ -137,7 +137,7 @@ def handle_command(data):
         return run_macro(name)
 
     else:
-        print("Comando no reconocido:", cmd)
+        print("Unknown command:", cmd)
         return False
 
 # --- MAIN LOOP ---
@@ -167,7 +167,7 @@ while True:
                 data = json.loads(text)
                 ok = handle_command(data)
 
-                # respuesta inmediata al ESP32
+                # immediate response to serial controller (E.g. ESP32, prolific USB-Serial)
                 if ok:
                     uart.write(b'{"status":"ok"}\n')
                 else:
