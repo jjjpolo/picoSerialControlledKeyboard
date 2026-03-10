@@ -20,7 +20,7 @@ except Exception as e:
     macros = {}
 
 # --- UART CONFIG ---
-uart = busio.UART(board.GP0, board.GP1, baudrate=115200, timeout=0.1) // RX=GP0, TX=GP1
+uart = busio.UART(board.GP0, board.GP1, baudrate=115200, timeout=0.01)  # RX=GP0, TX=GP1
 
 # --- LED for testing ---
 try:
@@ -46,11 +46,21 @@ def blink_led(times=1, duration=0.1):
         time.sleep(duration)
 
 # --- HID KEYBOARD ---
-keyboard = Keyboard(usb_hid.devices)
-layout = KeyboardLayoutUS(keyboard)
+try:
+    keyboard = Keyboard(usb_hid.devices)
+    layout = KeyboardLayoutUS(keyboard)
+    print("Keyboard initialized")
+except Exception as e:
+    print("Keyboard init error:", e)
+    keyboard = None
+    layout = None
 
 # --- HELPER: hotkey press ---
 def send_hotkey(keys):
+    if not keyboard:
+        print("Keyboard not initialized")
+        return False
+    
     keycodes = []
     for k in keys:
         try:
@@ -73,15 +83,22 @@ def execute_sequence(actions):
             send_hotkey(keys)
         elif action_type == "write":
             text = action.get("text", "")
-            layout.write(text)
+            if layout:
+                try:
+                    layout.write(text)
+                except Exception as e:
+                    print("Write error:", e)
         elif action_type == "press":
             key = action.get("key", "")
-            try:
-                kc = getattr(Keycode, key)
-                keyboard.press(kc)
-                keyboard.release_all()
-            except AttributeError:
-                print("Key not recognized:", key)
+            if keyboard:
+                try:
+                    kc = getattr(Keycode, key)
+                    keyboard.press(kc)
+                    keyboard.release_all()
+                except AttributeError:
+                    print("Key not recognized:", key)
+            else:
+                print("Keyboard not initialized")
         elif action_type == "delay":
             seconds = action.get("seconds", 0)
             time.sleep(seconds)
@@ -103,7 +120,12 @@ def handle_command(data):
 
     if cmd == "type":
         text = data.get("text", "")
-        layout.write(text)
+        if layout:
+            try:
+                layout.write(text)
+            except Exception as e:
+                print("Write error:", e)
+                return False
         return True
 
     elif cmd == "hotkey":
@@ -122,12 +144,16 @@ def handle_command(data):
 buffer = b""
 print("=== Pico Serial Keyboard Started ===")
 
+# LED blink timing
+led_timer = time.monotonic() # Monotonic timer for non-blocking LED toggle
+led_state = False
+
 while True:
     chunk = uart.read()
     if chunk:
         buffer += chunk
 
-        # procesar línea por línea
+        # process line by line
         while b"\n" in buffer:
             line, buffer = buffer.split(b"\n", 1)
             try:
@@ -151,5 +177,13 @@ while True:
                 print("ERROR:", e)
                 uart.write(b'{"status":"invalid_json"}\n')
 
+    # non-blocking LED toggle every 1 second
+    now = time.monotonic()
+    if now - led_timer >= 1.0:
+        if led:
+            led_state = not led_state
+            led.value = led_state
+        led_timer = now
+
     # small pause to avoid busy-wait
-    time.sleep(0.1)
+    time.sleep(0.01)

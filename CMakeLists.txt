@@ -21,7 +21,7 @@ add_custom_target(deploy
 add_custom_target(install-deps
     COMMAND ${CMAKE_COMMAND} -E echo "Setting up lib directory..."
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND ${CMAKE_COMMAND} -E echo "Download bundle from: https://github.com/adafruit/Adafruit_CircuitPython_Bundle/releases"
+    COMMAND ${CMAKE_COMMAND} -E echo "Download bundle from: https://github.com/adafruit/Adafruit_CircuitPython_Bundle/releases/download/20260310/adafruit-circuitpython-bundle-10.x-mpy-20260310.zip"
     COMMAND ${CMAKE_COMMAND} -E echo "Then extract: adafruit_hid/ and adafruit_bus_device/ to lib/"
     COMMAND ${CMAKE_COMMAND} -E echo "✓ ready to install (follow instructions above)"
     COMMENT "Setting up minimal library structure"

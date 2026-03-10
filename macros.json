@@ -1,12 +1,26 @@
 {
-  "shutdown_windows": [
-    {"type": "hotkey", "keys": ["WINDOWS"]},
+  "shutdown": [
+    {"type": "hotkey", "keys": ["GUI", "R"]},
     {"type": "delay", "seconds": 0.2},
     {"type": "write", "text": "shutdown /s /t 0"},
     {"type": "delay", "seconds": 0.1},
     {"type": "press", "key": "ENTER"}
   ],
-  "abrir_terminal": [
-    {"type": "hotkey", "keys": ["CTRL", "ALT", "T"]}
-  ]
+  "gitbash": [
+    {"type": "hotkey", "keys": ["LEFT_CONTROL", "LEFT_ALT", "T"]}
+  ],
+  "lock": [
+    {"type": "hotkey", "keys": ["GUI", "L"]}
+  ],
+    "theine": [
+    {"type": "hotkey", "keys": ["GUI"]},
+    {"type": "delay", "seconds": 0.2},
+    {"type": "write", "text": "theine"},
+    {"type": "delay", "seconds": 0.1},
+    {"type": "press", "key": "ENTER"}
+  ],
+    "unlock": [
+    {"type": "hotkey", "text": ["1234"]},
+    {"type": "press", "key": "ENTER"}
+  ]  
 }

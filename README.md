@@ -62,10 +62,49 @@ Example:
 }
 ```
 
-## Usage
+## Manual Library Installation (if CMake is not working)
 
-- Connect to the Pico via serial (UART on GP0/GP1 at 115200 baud).
-- Send commands to trigger keyboard macros (e.g., "shutdown_windows", "abrir_terminal").
+If you can't use CMake, you can manually install the required libraries:
+
+1. Download the [Adafruit CircuitPython Bundle](https://github.com/adafruit/Adafruit_CircuitPython_Bundle/releases) matching your CircuitPython version.
+2. Unzip the bundle on your computer.
+3. Copy the following folders from the bundle's `lib/` directory to the `lib/` folder on your Pico:
+   - `adafruit_hid/`
+   - `adafruit_bus_device/`
+4. Your Pico's `lib/` folder should now contain only the folders you need (not the entire bundle).
+
+## Serial Command Usage Examples
+
+You can control the Pico by sending JSON commands over UART (GP0/GP1, 115200 baud). Each command must be a single line of valid JSON.
+
+### Type Text
+```
+{"cmd": "type", "text": "hello world"}
+```
+
+### Send Hotkey
+```
+{"cmd": "hotkey", "keys": ["LEFT_CONTROL", "C"]}
+```
+
+### Run a Macro
+```
+{"cmd": "macro", "name": "abrir_terminal"}
+```
+
+### Shutdown PC Macro (Windows)
+```
+{"cmd": "macro", "name": "shutdown_pc"}
+```
+
+- Macros are defined in `macros.json`. See that file for available macro names and key options.
+- For Windows key, use `"GUI"`. For Ctrl, use `"LEFT_CONTROL"` or `"RIGHT_CONTROL"`.
+- All key names must match those in [adafruit_hid.keycode.Keycode](https://circuitpython.readthedocs.io/projects/hid/en/latest/api.html#adafruit_hid.keycode.Keycode).
+
+## Troubleshooting
+- If macros or hotkeys don't work, check your key names in `macros.json`.
+- Make sure your serial terminal sends a newline (\n) at the end of each command.
+- If CMake fails, use the manual library installation steps above.
 
 ## Version
 
