@@ -43,3 +43,18 @@ class ConfigManager:
         if self.log:
             self.log.debug("[ConfigManager] __del__ called, saving config.")
         self.save()
+
+    def reload_config(config, log):
+        """
+        Reload configuration from disk and update log level.
+        Args:
+            config (ConfigManager): The config manager instance to reload.
+            log (Log): The logger instance to update.
+        Returns:
+            Tuple[ConfigManager, Log]: Updated config and log instances.
+        """
+        config.reload()
+        log = log.__class__(debug_level=config.get_config("debug", 0))
+        config.log = log
+        log.info("Configuration reloaded from disk.")
+        return config, log
