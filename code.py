@@ -2,9 +2,11 @@ import board
 import busio
 import digitalio
 import json
-from config_manager import ConfigManager
 import time
 import usb_hid
+
+from config_manager import ConfigManager
+from logger import Log
 
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keycode import Keycode
@@ -12,17 +14,6 @@ from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
 from adafruit_hid.mouse import Mouse
 
 __version__ = "1.0.0 - DEV"
-
-# --- Simple logging class ---
-class Log:
-    def __init__(self, debug_level=0):
-        self.debug_level = debug_level
-    def debug(self, *args, **kwargs):
-        if self.debug_level >= 1:
-            print(*args, **kwargs)
-    def info(self, *args, **kwargs):
-        if self.debug_level >= 0:
-            print(*args, **kwargs)
 
 # Set log level for 1st use as debug since config is loaded later and may override it
 log = Log(debug_level=1)
