@@ -73,6 +73,13 @@ def handle_command(data):
         log.debug("Unknown command:", cmd)
         return False
 
+def reload_config():
+    global config, log
+    config = ConfigManager(log=log)
+    log = Log(debug_level=config.get_config("debug", 0))
+    config.log = log
+    log.info("Configuration reloaded from disk.")
+
 def main():
     buffer = b""
     log.info(f"=== Pico Serial Keyboard Started V{__version__} ===")
