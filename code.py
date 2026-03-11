@@ -48,7 +48,14 @@ except Exception as e:
     log.error("Mouse init error:", e)
     mouse = None
 
-def handle_command(data):
+def handle_command(data: dict) -> bool:
+    """
+    Handle a command dictionary received from serial input.
+    Args:
+        data (dict): The parsed JSON command.
+    Returns:
+        bool: True if command handled successfully, False otherwise.
+    """
     cmd = data.get("cmd")
 
     if cmd == "type":
@@ -73,28 +80,34 @@ def handle_command(data):
         return run_macro(name, macros, keyboard, layout, log)
 
     else:
-        log.error(f"Unknown command: {cmd}")
+        log.debug(f"Unknown command: {cmd}")
         return False
 
-def reload_config():
+def reload_config() -> None:
+    """
+    Reload configuration from disk and update log level.
+    """
     global config, log
     config = ConfigManager(log=log)
     log = Log(debug_level=config.get_config("debug", 0))
     config.log = log
     log.info("Configuration reloaded from disk.")
 
-def main():
+def main() -> None:
+    """
+    Main application loop. Handles UART input, macro execution, mouse jiggler, and LED heartbeat.
+    """
     buffer = b""
     log.info(f"=== Pico Serial Keyboard Started V{__version__} ===")
 
     # LED heartbeat counter (for delay management)
-    led_counter = 0
-    led_counter_max = 100  # 0.01s * 100 = 1 second
-    led_state = False
+    led_counter: int = 0
+    led_counter_max: int = 100  # 0.01s * 100 = 1 second
+    led_state: bool = False
 
     # Mouse jiggler counter (for delay management)
-    jiggle_counter = 0
-    jiggle_counter_max = config.get_config("mouse_jiggler_interval_ms", 60000)  # default 60 seconds
+    jiggle_counter: int = 0
+    jiggle_counter_max: int = config.get_config("mouse_jiggler_interval_ms", 60000)  # default 60 seconds
 
     # --- Boot sequence with interruptible delay (counter-based) ---
     boot_macro = config.get_config("boot_macro")
