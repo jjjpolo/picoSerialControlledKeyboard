@@ -1,3 +1,16 @@
+###############################
+# Constants and Defaults      #
+###############################
+UART_RX_PIN = 0  # board.GP0
+UART_TX_PIN = 1  # board.GP1
+BOOT_BTN_PIN = 15  # board.GP15
+LED_PIN = 25  # board.GP25
+UART_BAUDRATE = 115200
+UART_TIMEOUT = 0.01
+LED_HEARTBEAT_INTERVAL_MS = 1000  # 1 second
+MOUSE_JIGGLER_DEFAULT_INTERVAL_MS = 60000  # 60 seconds
+BOOT_DELAY_DEFAULT_MS = 3000
+
 
 import time
 import usb_hid
@@ -102,16 +115,16 @@ def main() -> None:
 
     # LED heartbeat counter (for delay management)
     led_counter: int = 0
-    led_counter_max: int = 100  # 0.01s * 100 = 1 second
+    led_counter_max: int = int(LED_HEARTBEAT_INTERVAL_MS / 10)  # 0.01s * N = interval
     led_state: bool = False
 
     # Mouse jiggler counter (for delay management)
     jiggle_counter: int = 0
-    jiggle_counter_max: int = config.get_config("mouse_jiggler_interval_ms", 60000)  # default 60 seconds
+    jiggle_counter_max: int = config.get_config("mouse_jiggler_interval_ms", MOUSE_JIGGLER_DEFAULT_INTERVAL_MS)
 
     # --- Boot sequence with interruptible delay (counter-based) ---
     boot_macro = config.get_config("boot_macro")
-    boot_delay_ms = config.get_config("boot_delay_ms", 3000)  # default 3 seconds
+    boot_delay_ms = config.get_config("boot_delay_ms", BOOT_DELAY_DEFAULT_MS)
     if boot_macro:
         log.info(f"Boot sequence will start in {boot_delay_ms/1000:.1f}s. Press button to cancel.")
         # LED pattern and button check during delay

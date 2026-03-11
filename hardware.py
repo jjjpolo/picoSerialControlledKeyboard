@@ -1,3 +1,5 @@
+BOOT_BTN_PIN = 15  # board.GP15
+LED_PIN = 25      # board.GP25
 import board
 import busio
 import digitalio
@@ -7,11 +9,11 @@ def setup_uart():
 
 def setup_button(log=None):
     try:
-        boot_btn = digitalio.DigitalInOut(board.GP15)
+        boot_btn = digitalio.DigitalInOut(getattr(board, f"GP{BOOT_BTN_PIN}"))
         boot_btn.direction = digitalio.Direction.INPUT
         boot_btn.pull = digitalio.Pull.DOWN
         if log:
-            log.debug("Boot interrupt button initialized on GP15")
+            log.debug(f"Boot interrupt button initialized on GP{BOOT_BTN_PIN}")
         return boot_btn
     except Exception as e:
         if log:
@@ -23,10 +25,10 @@ def is_boot_btn_pressed(boot_btn):
 
 def setup_led(log=None):
     try:
-        led = digitalio.DigitalInOut(board.GP25)
+        led = digitalio.DigitalInOut(getattr(board, f"GP{LED_PIN}"))
         led.direction = digitalio.Direction.OUTPUT
         if log:
-            log.debug("LED initialized on GP25")
+            log.debug(f"LED initialized on GP{LED_PIN}")
         return led
     except Exception as e:
         if log:
