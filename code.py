@@ -1,30 +1,22 @@
 import board
-import busio
-import digitalio
-import json
+
 import time
 import usb_hid
-
 from config_manager import ConfigManager
 from logger import Log
-
+from macros import load_macros, run_macro, execute_sequence, send_hotkey
+from hardware import setup_uart, setup_button, setup_led, blink_led, boot_delay_led_pattern, is_boot_btn_pressed
 from adafruit_hid.keyboard import Keyboard
-from adafruit_hid.keycode import Keycode
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
 from adafruit_hid.mouse import Mouse
-
 __version__ = "1.0.0 - DEV"
 
 # Set log level for 1st use as debug since config is loaded later and may override it
 log = Log(debug_level=1)
 
-# Load macros from JSON
-try:
-    with open("macros.json", "r") as f:
-        macros = json.load(f)
-except Exception as e:
-    log.error("Error loading macros:", e)
-    macros = {}
+
+# Load macros using macros.py
+macros = load_macros(log)
 
 
 # Instantiate config manager
@@ -34,58 +26,15 @@ log = Log(debug_level=config.get_config("debug", 0))
 config.log = log
 
 
+
 # --- UART CONFIG ---
-uart = busio.UART(board.GP0, board.GP1, baudrate=115200, timeout=0.01)  # RX=GP0, TX=GP1
+uart = setup_uart()
 
 
-# --- BUTTON for boot sequence interrupt (developer-defined, GP15) ---
-try:
-    boot_btn = digitalio.DigitalInOut(board.GP15)
-    boot_btn.direction = digitalio.Direction.INPUT
-    boot_btn.pull = digitalio.Pull.DOWN
-    log.debug("Boot interrupt button initialized on GP15")
-except Exception as e:
-    log.error("Boot button init error:", e)
-    boot_btn = None
 
-# --- HELPER: check if button pressed ---
-def is_boot_btn_pressed():
-    return boot_btn and boot_btn.value
-
-# --- HELPER: special LED pattern for boot delay ---
-def boot_delay_led_pattern(duration_s):
-    if not led:
-        time.sleep(duration_s)
-        return
-    end_time = time.monotonic() + duration_s
-    while time.monotonic() < end_time:
-        led.value = True
-        time.sleep(0.1)
-        led.value = False
-        time.sleep(0.1)
-
-# --- LED for testing ---
-try:
-    led = digitalio.DigitalInOut(board.GP25)
-    led.direction = digitalio.Direction.OUTPUT
-    log.debug("LED initialized on GP25")
-except Exception as e:
-    log.error("LED init error:", e)
-    led = None
-
-# --- HELPER: blink LED ---
-def blink_led(times=1, duration=0.1):
-    """Blink the onboard LED a number of times.
-    times: how many on/off cycles
-    duration: seconds each state lasts
-    """
-    if not led:
-        return
-    for _ in range(times):
-        led.value = True
-        time.sleep(duration)
-        led.value = False
-        time.sleep(duration)
+# --- BUTTON and LED setup ---
+boot_btn = setup_button(log)
+led = setup_led(log)
 
 
 # --- HID KEYBOARD ---
@@ -106,64 +55,7 @@ except Exception as e:
     log.error("Mouse init error:", e)
     mouse = None
 
-# --- HELPER: hotkey press ---
-def send_hotkey(keys):
-    if not keyboard:
-        log.debug("Keyboard not initialized")
-        return False
-    
-    keycodes = []
-    for k in keys:
-        try:
-            keycodes.append(getattr(Keycode, k))
-        except AttributeError:
-            log.error("Unrecognized key:", k)
-            return False
 
-    for kc in keycodes:
-        keyboard.press(kc)
-    keyboard.release_all()
-    return True
-
-# --- HELPER: execute action sequence ---
-def execute_sequence(actions):
-    for action in actions:
-        action_type = action.get("type")
-        if action_type == "hotkey":
-            keys = action.get("keys", [])
-            send_hotkey(keys)
-        elif action_type == "write":
-            text = action.get("text", "")
-            if layout:
-                try:
-                    layout.write(text)
-                except Exception as e:
-                    log.error("Write error:", e)
-        elif action_type == "press":
-            key = action.get("key", "")
-            if keyboard:
-                try:
-                    kc = getattr(Keycode, key)
-                    keyboard.press(kc)
-                    keyboard.release_all()
-                except AttributeError:
-                    log.error("Unrecognized key:", key)
-            else:
-                log.error("Keyboard not initialized")
-        elif action_type == "delay":
-            seconds = action.get("seconds", 0)
-            time.sleep(seconds)
-        else:
-            log.error("Unknown action type:", action_type)
-
-# --- HELPER: definir macros ---
-def run_macro(name):
-    if name in macros:
-        execute_sequence(macros[name])
-        return True
-    else:
-        log.error("Unknown macro:", name)
-        return False
 
 # --- Command Router ---
 def handle_command(data):
@@ -179,13 +71,14 @@ def handle_command(data):
                 return False
         return True
 
+
     elif cmd == "hotkey":
         keys = data.get("keys", [])
-        return send_hotkey(keys)
+        return send_hotkey(keys, keyboard, log)
 
     elif cmd == "macro":
         name = data.get("name", "")
-        return run_macro(name)
+        return run_macro(name, macros, keyboard, layout, log)
 
     else:
         log.debug("Unknown command:", cmd)
@@ -205,8 +98,6 @@ led_state = False
 # Mouse jiggler counter (for delay management)
 jiggle_counter = 0
 jiggle_counter_max = config.get_config("mouse_jiggler_interval_ms", 60000)  # default 60 seconds
-
-
 
 # --- Boot sequence with interruptible delay (counter-based) ---
 boot_macro = config.get_config("boot_macro")
@@ -229,7 +120,7 @@ if boot_macro:
         log.info("Boot sequence cancelled by user.")
     else:
         log.info(f"Executing boot macro: {boot_macro}")
-        run_macro(boot_macro)
+        run_macro(boot_macro, macros, keyboard, layout, log)
 
 while True:
     chunk = uart.read()
@@ -280,7 +171,7 @@ while True:
                 time.sleep(0.05)
                 mouse.move(-1, 0) # move left (DEBUG: larger movement)
                 log.info(f"Mouse jiggled")
-                blink_led(times=3, duration=0.08)  # blink 3 times for jiggler
+                blink_led(led, times=3, duration=0.08)  # blink 3 times for jiggler
                 # Restore LED state so heartbeat pattern is not affected
                 if led:
                     led.value = prev_led_state
