@@ -1,3 +1,4 @@
+
 ###############################
 # Constants and Defaults      #
 ###############################
@@ -71,29 +72,14 @@ except Exception as e:
 # Instantiate the command handler
 command_handler = CommandHandler(keyboard, layout, macros, log)
 
-
-def main() -> None:
+def run_boot_sequence(config, log, macros, keyboard, layout, led, boot_btn):
     """
-    Main application loop. Handles UART input, macro execution, mouse jiggler, and LED heartbeat.
+    Run the boot macro sequence with interruptible delay.
     """
-    buffer = b""
-    log.info(f"=== Pico Serial Keyboard Started V{__version__} ===")
-
-    # LED heartbeat counter (for delay management)
-    led_counter: int = 0
-    led_counter_max: int = int(LED_HEARTBEAT_INTERVAL_MS / 10)  # 0.01s * N = interval
-    led_state: bool = False
-
-    # Mouse jiggler counter (for delay management)
-    jiggle_counter: int = 0
-    jiggle_counter_max: int = config.get_config("mouse_jiggler_interval_ms", MOUSE_JIGGLER_DEFAULT_INTERVAL_MS)
-
-    # --- Boot sequence with interruptible delay (counter-based) ---
     boot_macro = config.get_config("boot_macro")
     boot_delay_ms = config.get_config("boot_delay_ms", BOOT_DELAY_DEFAULT_MS)
     if boot_macro:
         log.info(f"Boot sequence will start in {boot_delay_ms/1000:.1f}s. Press button to cancel.")
-        # LED pattern and button check during delay
         delay_loops = int(boot_delay_ms / 10)  # 0.01s per loop
         cancelled = False
         for _ in range(delay_loops):
@@ -110,6 +96,54 @@ def main() -> None:
         else:
             log.info(f"Executing boot macro: {boot_macro}")
             run_macro(boot_macro, macros, keyboard, layout, log)
+
+def handle_led_heartbeat(led, log, led_counter, led_counter_max, led_state):
+    """
+    Manage LED heartbeat pattern. Returns updated led_counter and led_state.
+    """
+    led_counter += 1
+    if led_counter >= led_counter_max:
+        if led:
+            led_state = not led_state
+            led.value = led_state
+        led_counter = 0
+        log.debug("Heartbeat LED:", "ON" if led_state else "OFF")
+    return led_counter, led_state
+
+def handle_mouse_jiggler(config, mouse, led, log, jiggle_counter, jiggle_counter_max):
+    """
+    Manage mouse jiggler logic. Returns updated jiggle_counter.
+    """
+    if config.get_config("mouse_jiggler_enabled", True):
+        jiggle_counter += 1
+        if jiggle_counter >= jiggle_counter_max / 10:  # convert ms to counter units (0.01s)
+            if mouse:
+                prev_led_state = led.value if led else False
+                mouse.move(1, 0)
+                time.sleep(0.05)
+                mouse.move(-1, 0)
+                log.info(f"Mouse jiggled")
+                blink_led(led, times=3, duration=0.08)
+                if led:
+                    led.value = prev_led_state
+            jiggle_counter = 0
+    return jiggle_counter
+
+def main() -> None:
+    """
+    Main application loop. Handles UART input, macro execution, mouse jiggler, and LED heartbeat.
+    """
+    buffer = b""
+    log.info(f"=== Pico Serial Keyboard Started V{__version__} ===")
+
+    led_counter: int = 0
+    led_counter_max: int = int(LED_HEARTBEAT_INTERVAL_MS / 10)
+    led_state: bool = False
+    jiggle_counter: int = 0
+    jiggle_counter_max: int = config.get_config("mouse_jiggler_interval_ms", MOUSE_JIGGLER_DEFAULT_INTERVAL_MS)
+
+    # Run boot sequence
+    run_boot_sequence(config, log, macros, keyboard, layout, led, boot_btn)
 
     while True:
         chunk = uart.read()
@@ -140,32 +174,10 @@ def main() -> None:
                     log.error("ERROR:", e)
                     uart.write(b'{"status":"invalid_json"}\n')
 
-        # LED heartbeat using a simple counter
-        led_counter += 1
-        if led_counter >= led_counter_max:
-            if led:
-                led_state = not led_state
-                led.value = led_state
-            led_counter = 0
-            log.debug("Heartbeat LED:", "ON" if led_state else "OFF")
-
-        # Mouse jiggler: use a simple counter for timing
-        if config.get_config("mouse_jiggler_enabled", True):
-            jiggle_counter += 1
-            if jiggle_counter >= jiggle_counter_max / 10:  # convert ms to counter units (0.01s)
-                if mouse:
-                    # Save LED state to restore heartbeat after jiggler blinks
-                    prev_led_state = led.value if led else False
-                    mouse.move(1, 0)  # move right (DEBUG: larger movement)
-                    time.sleep(0.05)
-                    mouse.move(-1, 0) # move left (DEBUG: larger movement)
-                    log.info(f"Mouse jiggled")
-                    blink_led(led, times=3, duration=0.08)  # blink 3 times for jiggler
-                    # Restore LED state so heartbeat pattern is not affected
-                    if led:
-                        led.value = prev_led_state
-                jiggle_counter = 0
-
+        # LED heartbeat
+        led_counter, led_state = handle_led_heartbeat(led, log, led_counter, led_counter_max, led_state)
+        # Mouse jiggler
+        jiggle_counter = handle_mouse_jiggler(config, mouse, led, log, jiggle_counter, jiggle_counter_max)
         # small pause to avoid busy-wait
         time.sleep(0.01)
 
