@@ -13,6 +13,7 @@ BOOT_DELAY_DEFAULT_MS = 3000
 
 
 import time
+import json
 import usb_hid
 from config_manager import ConfigManager
 from logger import Log
