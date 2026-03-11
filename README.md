@@ -120,6 +120,18 @@ You can control the Pico by sending JSON commands over UART (GP0/GP1, 115200 bau
 {"cmd": "macro", "name": "shutdown_pc"}
 ```
 
+### Graceful Shutdown (Exit Main Loop)
+
+You can gracefully stop the Pico's main loop and exit (for reset, update, or safe shutdown) by sending this serial command:
+
+```
+{"cmd": "shutdown"}
+```
+
+- The Pico will acknowledge with `{ "status": "ok" }` and exit the main loop.
+- You can restart the script by pressing the reset button or power-cycling the Pico.
+- This is useful for safe updates, development, or remote resets.
+
 - Macros are defined in `macros.json`. See that file for available macro names and key options.
 - For Windows key, use `"GUI"`. For Ctrl, use `"LEFT_CONTROL"` or `"RIGHT_CONTROL"`.
 - All key names must match those in [adafruit_hid.keycode.Keycode](https://circuitpython.readthedocs.io/projects/hid/en/latest/api.html#adafruit_hid.keycode.Keycode).

@@ -147,6 +147,7 @@ def main() -> None:
 
     while True:
         chunk = uart.read()
+
         if chunk:
             buffer += chunk
 
@@ -169,6 +170,11 @@ def main() -> None:
                         uart.write(b'{"status":"ok"}\n')
                     else:
                         uart.write(b'{"status":"error"}\n')
+
+                    # Check for shutdown request
+                    if command_handler.shutdown_requested:
+                        log.info("Graceful shutdown triggered. Breaking main loop.")
+                        return
 
                 except Exception as e:
                     log.error("ERROR:", e)

@@ -10,10 +10,12 @@ class CommandHandler:
         self.layout = layout
         self.macros = macros
         self.log = log
+        self._shutdown_requested = False
         self.dispatch = {
             "type": self.cmd_type,
             "hotkey": self.cmd_hotkey,
             "macro": self.cmd_macro,
+            "shutdown": self.cmd_shutdown,
         }
 
     def handle(self, data: dict) -> bool:
@@ -31,6 +33,15 @@ class CommandHandler:
         else:
             self.log.debug(f"Unknown command: {cmd}")
             return False
+
+    @property
+    def shutdown_requested(self):
+        return self._shutdown_requested
+
+    def cmd_shutdown(self, data):
+        self.log.info("Shutdown command received. Exiting main loop.")
+        self._shutdown_requested = True
+        return True
 
     def cmd_type(self, data):
         text = data.get("text", "")
