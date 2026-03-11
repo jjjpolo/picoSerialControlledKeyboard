@@ -59,18 +59,21 @@ def handle_command(data):
             except Exception as e:
                 log.error("Write error:", e)
                 return False
+        log.info(f"Typed text: {text}")
         return True
 
     elif cmd == "hotkey":
         keys = data.get("keys", [])
+        log.info(f"Hotkey command: {keys}")
         return send_hotkey(keys, keyboard, log)
 
     elif cmd == "macro":
         name = data.get("name", "")
+        log.info(f"Macro command: {name}")
         return run_macro(name, macros, keyboard, layout, log)
 
     else:
-        log.debug("Unknown command:", cmd)
+        log.error(f"Unknown command: {cmd}")
         return False
 
 def reload_config():
