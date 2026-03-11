@@ -1,3 +1,15 @@
+# Wiring
+
+See [WIRING.md](WIRING.md) for a detailed wiring diagram and pinout.
+
+**Quick summary:**
+- GP0: UART RX (connect to TX of controller)
+- GP1: UART TX (connect to RX of controller)
+- GP15: Boot cancel button (to GND)
+- GP25: Onboard LED (status)
+- GND: Ground
+- USB: Connect to host computer
+
 # Pico Serial Controlled Keyboard
 
 This project turns a Raspberry Pi Pico into a programmable USB keyboard that is controlled by serial commands. The Pico receives commands over UART (serial) and translates them into USB keyboard actions on the connected computer.

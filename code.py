@@ -45,8 +45,36 @@ except Exception as e:
 # Reset log level to config value after loading config
 log = Log(debug_level=config.get("debug", 0))
 
+
 # --- UART CONFIG ---
 uart = busio.UART(board.GP0, board.GP1, baudrate=115200, timeout=0.01)  # RX=GP0, TX=GP1
+
+
+# --- BUTTON for boot sequence interrupt (developer-defined, GP15) ---
+try:
+    boot_btn = digitalio.DigitalInOut(board.GP15)
+    boot_btn.direction = digitalio.Direction.INPUT
+    boot_btn.pull = digitalio.Pull.DOWN
+    log.debug("Boot interrupt button initialized on GP15")
+except Exception as e:
+    log.error("Boot button init error:", e)
+    boot_btn = None
+
+# --- HELPER: check if button pressed ---
+def is_boot_btn_pressed():
+    return boot_btn and boot_btn.value
+
+# --- HELPER: special LED pattern for boot delay ---
+def boot_delay_led_pattern(duration_s):
+    if not led:
+        time.sleep(duration_s)
+        return
+    end_time = time.monotonic() + duration_s
+    while time.monotonic() < end_time:
+        led.value = True
+        time.sleep(0.1)
+        led.value = False
+        time.sleep(0.1)
 
 # --- LED for testing ---
 try:
@@ -190,11 +218,30 @@ led_state = False
 jiggle_counter = 0
 jiggle_counter_max = config.get("mouse_jiggler_interval_ms", 60000)  # default 60 seconds
 
-# Execute boot macro if configured
+
+
+# --- Boot sequence with interruptible delay (counter-based) ---
 boot_macro = config.get("boot_macro")
+boot_delay_ms = config.get("boot_delay_ms", 3000)  # default 3 seconds
 if boot_macro:
-    log.info(f"Executing boot macro: {boot_macro}")
-    run_macro(boot_macro)
+    log.info(f"Boot sequence will start in {boot_delay_ms/1000:.1f}s. Press button to cancel.")
+    # LED pattern and button check during delay
+    delay_loops = int(boot_delay_ms / 10)  # 0.01s per loop
+    cancelled = False
+    for _ in range(delay_loops):
+        if led:
+            led.value = not led.value
+        time.sleep(0.01)
+        if is_boot_btn_pressed():
+            cancelled = True
+            break
+    if led:
+        led.value = False
+    if cancelled:
+        log.info("Boot sequence cancelled by user.")
+    else:
+        log.info(f"Executing boot macro: {boot_macro}")
+        run_macro(boot_macro)
 
 while True:
     chunk = uart.read()
