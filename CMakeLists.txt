@@ -15,6 +15,7 @@ add_custom_target(deploy
     COMMAND powershell -Command "Copy-Item config_manager.py ${PICO_DRIVE}"
     COMMAND powershell -Command "Copy-Item logger.py ${PICO_DRIVE}"
     COMMAND powershell -Command "Copy-Item macros.py ${PICO_DRIVE}"
+    COMMAND powershell -Command "Copy-Item command_handler.py ${PICO_DRIVE}"
     COMMAND powershell -Command "Copy-Item hardware.py ${PICO_DRIVE}"
     COMMAND powershell -Command "if (Test-Path lib/adafruit_hid) { Copy-Item -Recurse lib/adafruit_hid '${PICO_DRIVE}/lib/' }"
     COMMAND powershell -Command "if (Test-Path lib/adafruit_bus_device) { Copy-Item -Recurse lib/adafruit_bus_device '${PICO_DRIVE}/lib/' }"

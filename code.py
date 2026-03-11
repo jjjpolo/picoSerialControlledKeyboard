@@ -18,6 +18,7 @@ import usb_hid
 from config_manager import ConfigManager
 from logger import Log
 from macros import load_macros, run_macro, execute_sequence, send_hotkey
+from command_handler import CommandHandler
 from hardware import setup_uart, setup_button, setup_led, blink_led, boot_delay_led_pattern, is_boot_btn_pressed
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
@@ -62,40 +63,13 @@ except Exception as e:
     log.error("Mouse init error:", e)
     mouse = None
 
-def handle_command(data: dict) -> bool:
-    """
-    Handle a command dictionary received from serial input.
-    Args:
-        data (dict): The parsed JSON command.
-    Returns:
-        bool: True if command handled successfully, False otherwise.
-    """
-    cmd = data.get("cmd")
 
-    if cmd == "type":
-        text = data.get("text", "")
-        if layout:
-            try:
-                layout.write(text)
-            except Exception as e:
-                log.error("Write error:", e)
-                return False
-        log.info(f"Typed text: {text}")
-        return True
 
-    elif cmd == "hotkey":
-        keys = data.get("keys", [])
-        log.info(f"Hotkey command: {keys}")
-        return send_hotkey(keys, keyboard, log)
-
-    elif cmd == "macro":
-        name = data.get("name", "")
-        log.info(f"Macro command: {name}")
-        return run_macro(name, macros, keyboard, layout, log)
-
-    else:
-        log.debug(f"Unknown command: {cmd}")
-        return False
+###############################
+# Command Handler Setup        #
+###############################
+# Instantiate the command handler
+command_handler = CommandHandler(keyboard, layout, macros, log)
 
 
 def main() -> None:
@@ -154,7 +128,7 @@ def main() -> None:
 
                     # parse JSON
                     data = json.loads(text)
-                    ok = handle_command(data)
+                    ok = command_handler.handle(data)
 
                     # immediate response to serial controller (E.g. ESP32, prolific USB-Serial)
                     if ok:
