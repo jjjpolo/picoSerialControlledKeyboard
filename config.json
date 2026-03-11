@@ -1,8 +1,8 @@
 {
   "mouse_jiggler_enabled": true,
   "mouse_jiggler_interval_ms": 60000,
-  "_boot_macro": null,
-  "boot_macro": "bootup_sequence",
+  "boot_macro": null,
+  "_boot_macro": "bootup_sequence",
   "boot_delay_ms": 3000,
   "debug": 0
 }

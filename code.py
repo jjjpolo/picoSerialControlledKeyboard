@@ -2,6 +2,7 @@ import board
 import busio
 import digitalio
 import json
+from config_manager import ConfigManager
 import time
 import usb_hid
 
@@ -34,16 +35,12 @@ except Exception as e:
     log.error("Error loading macros:", e)
     macros = {}
 
-# Load config from JSON
-try:
-    with open("config.json", "r") as f:
-        config = json.load(f)
-except Exception as e:
-    log.error("Error loading config:", e)
-    config = {"mouse_jiggler_enabled": True, "debug": 0}
 
+# Instantiate config manager
+config = ConfigManager(log=log)
 # Reset log level to config value after loading config
-log = Log(debug_level=config.get("debug", 0))
+log = Log(debug_level=config.get_config("debug", 0))
+config.log = log
 
 
 # --- UART CONFIG ---
@@ -216,13 +213,13 @@ led_state = False
 
 # Mouse jiggler counter (for delay management)
 jiggle_counter = 0
-jiggle_counter_max = config.get("mouse_jiggler_interval_ms", 60000)  # default 60 seconds
+jiggle_counter_max = config.get_config("mouse_jiggler_interval_ms", 60000)  # default 60 seconds
 
 
 
 # --- Boot sequence with interruptible delay (counter-based) ---
-boot_macro = config.get("boot_macro")
-boot_delay_ms = config.get("boot_delay_ms", 3000)  # default 3 seconds
+boot_macro = config.get_config("boot_macro")
+boot_delay_ms = config.get_config("boot_delay_ms", 3000)  # default 3 seconds
 if boot_macro:
     log.info(f"Boot sequence will start in {boot_delay_ms/1000:.1f}s. Press button to cancel.")
     # LED pattern and button check during delay
@@ -282,7 +279,7 @@ while True:
         log.debug("Heartbeat LED:", "ON" if led_state else "OFF")
 
     # Mouse jiggler: use a simple counter for timing
-    if config.get("mouse_jiggler_enabled", True):
+    if config.get_config("mouse_jiggler_enabled", True):
         jiggle_counter += 1
         if jiggle_counter >= jiggle_counter_max / 10:  # convert ms to counter units (0.01s)
             if mouse:
