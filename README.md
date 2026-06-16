@@ -197,6 +197,7 @@ See [WIRING.md](WIRING.md) for a detailed wiring diagram and pinout.
 - GP1: UART TX (connect to RX of controller)
 - GP15: Boot cancel button (to GND)
 - GP25: Onboard LED (status)
+- RUN (Pin 30): Reset button (to GND)
 - GND: Ground
 - USB: Connect to host computer
 

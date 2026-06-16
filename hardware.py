@@ -17,7 +17,7 @@ def setup_button(log=None):
     try:
         boot_btn = digitalio.DigitalInOut(getattr(board, f"GP{BOOT_BTN_PIN}"))
         boot_btn.direction = digitalio.Direction.INPUT
-        boot_btn.pull = digitalio.Pull.DOWN
+        boot_btn.pull = digitalio.Pull.UP
         if log:
             log.debug(f"Boot interrupt button initialized on GP{BOOT_BTN_PIN}")
         return boot_btn
@@ -27,7 +27,7 @@ def setup_button(log=None):
         return None
 
 def is_boot_btn_pressed(boot_btn):
-    return boot_btn and boot_btn.value
+    return boot_btn and not boot_btn.value
 
 def setup_led(log=None):
     try:
