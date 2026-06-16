@@ -1,15 +1,3 @@
-# Wiring
-
-See [WIRING.md](WIRING.md) for a detailed wiring diagram and pinout.
-
-**Quick summary:**
-- GP0: UART RX (connect to TX of controller)
-- GP1: UART TX (connect to RX of controller)
-- GP15: Boot cancel button (to GND)
-- GP25: Onboard LED (status)
-- GND: Ground
-- USB: Connect to host computer
-
 # Pico Serial Controlled Keyboard
 
 This project turns a Raspberry Pi Pico into a programmable USB keyboard that is controlled by serial commands. The Pico receives commands over UART (serial) and translates them into USB keyboard actions on the connected computer.
@@ -171,6 +159,20 @@ This project includes a configurable mouse jiggler feature. When enabled, the Pi
 
 No serial command is needed; the jiggler runs automatically if enabled in the config.
 
+## USB Mass Storage (Disable Storage Drive)
+
+By default, the Pico appears as a USB storage drive on your computer. You can disable this if you want the Pico to appear only as a keyboard/mouse and not show up as a removable drive.
+
+- In your `config.json`, set `usb_mass_storage_enabled` to `false`:
+  ```json
+  {
+    "usb_mass_storage_enabled": false
+  }
+  ```
+- The `boot.py` script reads this setting on startup and disables USB storage if needed.
+- Default is `true` (storage enabled, backward compatible).
+- You can still upload new code to the Pico via CircuitPython REPL or by holding the BOOTSEL button during power-up.
+
 ## Boot Macro (Run Macro at Startup)
 
 You can configure the Pico to automatically run a macro once at startup. This is useful for sending a specific key sequence or command as soon as the device boots.
@@ -178,12 +180,25 @@ You can configure the Pico to automatically run a macro once at startup. This is
 - In your `config.json`, set the `boot_macro` key to the name of a macro defined in `macros.json`:
   ```json
   {
+    "usb_mass_storage_enabled": true,
     "mouse_jiggler_enabled": true,
     "boot_macro": "bootup_sequence"
   }
   ```
 - The macro will be executed only once, right after the code starts and before entering the main loop.
 - To disable this feature, set `"boot_macro": null` or remove the key.
+
+# Wiring
+
+See [WIRING.md](WIRING.md) for a detailed wiring diagram and pinout.
+
+**Quick summary:**
+- GP0: UART RX (connect to TX of controller)
+- GP1: UART TX (connect to RX of controller)
+- GP15: Boot cancel button (to GND)
+- GP25: Onboard LED (status)
+- GND: Ground
+- USB: Connect to host computer
 
 ## Troubleshooting
 - If macros or hotkeys don't work, check your key names in `macros.json`.

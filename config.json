@@ -1,4 +1,5 @@
 {
+  "usb_mass_storage_enabled": true,
   "mouse_jiggler_enabled": true,
   "mouse_jiggler_interval_ms": 60000,
   "boot_macro": null,

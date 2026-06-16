@@ -14,6 +14,7 @@ set(PICO_DRIVE "D:" CACHE STRING "Drive letter where Pico is mounted")
 add_custom_target(deploy
     COMMAND ${CMAKE_COMMAND} -E echo "Deploying to ${PICO_DRIVE}"
     COMMAND powershell -NoProfile -ExecutionPolicy Bypass -Command "$$ErrorActionPreference = 'Stop'; if (-not (Test-Path '${PICO_DRIVE}')) { throw 'Pico drive not found at ${PICO_DRIVE}. Check PICO_DRIVE and that the board is mounted.' }; New-Item -ItemType Directory -Path '${PICO_DRIVE}/lib' -Force | Out-Null"
+    COMMAND powershell -NoProfile -ExecutionPolicy Bypass -Command "$$ErrorActionPreference = 'Stop'; Copy-Item boot.py ${PICO_DRIVE} -Force"
     COMMAND powershell -NoProfile -ExecutionPolicy Bypass -Command "$$ErrorActionPreference = 'Stop'; Copy-Item code.py ${PICO_DRIVE} -Force"
     COMMAND powershell -NoProfile -ExecutionPolicy Bypass -Command "$$ErrorActionPreference = 'Stop'; Copy-Item macros.json ${PICO_DRIVE} -Force"
     COMMAND powershell -NoProfile -ExecutionPolicy Bypass -Command "$$ErrorActionPreference = 'Stop'; Copy-Item config.json ${PICO_DRIVE} -Force"
