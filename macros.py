@@ -1,3 +1,9 @@
+"""Macro loading and execution helpers for keyboard automation.
+
+Parses macros.json, converts key names to HID keycodes, and runs action
+sequences such as write, hotkey, press, and delay.
+"""
+
 import json
 from adafruit_hid.keycode import Keycode
 

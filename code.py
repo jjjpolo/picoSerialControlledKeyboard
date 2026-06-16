@@ -1,4 +1,10 @@
 
+"""Main firmware entry point for the Pico serial-controlled keyboard.
+
+Initializes hardware and HID devices, then runs the UART command loop,
+boot macro handling, LED heartbeat, and mouse jiggler behavior.
+"""
+
 ###############################
 # Constants and Defaults      #
 ###############################

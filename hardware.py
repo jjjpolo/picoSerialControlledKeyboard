@@ -1,3 +1,9 @@
+"""Hardware setup and helpers for Pico GPIO/UART peripherals.
+
+Provides initialization and utility functions for UART, boot button,
+status LED, and LED blink patterns used by the firmware.
+"""
+
 BOOT_BTN_PIN = 15  # board.GP15
 LED_PIN = 25      # board.GP25
 import board

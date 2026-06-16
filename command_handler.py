@@ -1,6 +1,7 @@
-"""
-CommandHandler class for Pico Serial Keyboard
-Handles command dispatch and execution.
+"""Command routing layer for incoming serial JSON commands.
+
+Maps command names to handlers and executes typing, hotkey, macro, and
+shutdown actions for the main firmware loop.
 """
 from macros import run_macro, send_hotkey
 

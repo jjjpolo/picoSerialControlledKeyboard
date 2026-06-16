@@ -1,3 +1,5 @@
+"""Unit tests for macro loading, hotkeys, and macro execution flow."""
+
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))

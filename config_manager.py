@@ -1,3 +1,9 @@
+"""Configuration persistence helper for runtime settings.
+
+Loads values from config.json, provides get/set accessors, and saves
+updates back to disk.
+"""
+
 import json
 
 class ConfigManager:
