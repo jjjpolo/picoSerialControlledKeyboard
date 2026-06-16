@@ -52,7 +52,7 @@ This project uses CMake for automation tasks. After installing CMake:
    ```
 
 2. Run targets:
-   - Install dependencies (downloads Adafruit CircuitPython bundle):
+  - Install dependencies (downloads bundle and installs required libs into lib/):
      ```
      cmake --build . --target install-deps
      ```
