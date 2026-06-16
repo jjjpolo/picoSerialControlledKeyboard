@@ -5,7 +5,13 @@
     {"type": "write", "text": "bootup sequence"},
     {"type": "delay", "seconds": 1.0},
     {"type": "press", "key": "ESCAPE"},
-    {"type": "delay", "seconds": 10.0}
+    {"type": "delay", "seconds": 3.0},
+    {"type": "mouse", "moveY": 50},
+    {"type": "mouse", "moveX": 50},
+    {"type": "delay", "seconds": 2.0},
+    {"type": "mouse", "setXY": [0, 0]},
+    {"type": "mouse", "click": "right"},
+    {"type": "mouse", "click": "left"}    
   ],
   "shutdown": [
     {"type": "hotkey", "keys": ["GUI", "R"]},

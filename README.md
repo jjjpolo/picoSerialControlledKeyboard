@@ -72,6 +72,9 @@ Macros are defined in `macros.json`. Each macro is a list of actions:
 - `{"type": "hotkey", "keys": ["KEY1", "KEY2"]}` - Press multiple keys simultaneously
 - `{"type": "write", "text": "string"}` - Type text
 - `{"type": "press", "key": "KEY"}` - Press a single key
+- `{"type": "mouse", "moveX": 5, "moveY": -10}` - Move the mouse cursor (relative)
+- `{"type": "mouse", "setXY": [100, 200]}` - Set absolute mouse position
+- `{"type": "mouse", "click": "left"}` - Click the left, right, or middle mouse button
 - `{"type": "delay", "seconds": 0.5}` - Wait for specified seconds
 
 Example:
@@ -80,7 +83,9 @@ Example:
   "my_macro": [
     {"type": "hotkey", "keys": ["CTRL", "C"]},
     {"type": "delay", "seconds": 0.1},
-    {"type": "write", "text": "Hello World"}
+    {"type": "write", "text": "Hello World"},
+    {"type": "mouse", "setXY": [500, 300]},
+    {"type": "mouse", "click": "left"}
   ]
 }
 ```
@@ -113,6 +118,21 @@ You can control the Pico by sending JSON commands over UART (GP0/GP1, 115200 bau
 ### Run a Macro
 ```
 {"cmd": "macro", "name": "abrir_terminal"}
+```
+
+### Mouse Move
+```
+{"cmd": "mouse", "moveX": 7}
+```
+
+### Mouse Position (Absolute)
+```
+{"cmd": "mouse", "setXY": [100, 200]}
+```
+
+### Mouse Click
+```
+{"cmd": "mouse", "click": "right"}
 ```
 
 ### Shutdown PC Macro (Windows)

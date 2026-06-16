@@ -3,19 +3,21 @@
 Maps command names to handlers and executes typing, hotkey, macro, and
 shutdown actions for the main firmware loop.
 """
-from macros import run_macro, send_hotkey
+from macros import run_macro, send_hotkey, send_mouse_action
 
 class CommandHandler:
-    def __init__(self, keyboard, layout, macros, log):
+    def __init__(self, keyboard, layout, macros, log, mouse=None):
         self.keyboard = keyboard
         self.layout = layout
         self.macros = macros
         self.log = log
+        self.mouse = mouse
         self._shutdown_requested = False
         self.dispatch = {
             "type": self.cmd_type,
             "hotkey": self.cmd_hotkey,
             "macro": self.cmd_macro,
+            "mouse": self.cmd_mouse,
             "shutdown": self.cmd_shutdown,
         }
 
@@ -63,4 +65,10 @@ class CommandHandler:
     def cmd_macro(self, data):
         name = data.get("name", "")
         self.log.info(f"Macro command: {name}")
-        return run_macro(name, self.macros, self.keyboard, self.layout, self.log)
+        return run_macro(name, self.macros, self.keyboard, self.layout, self.mouse, self.log)
+
+    def cmd_mouse(self, data):
+        self.log.info(f"Mouse command: {data}")
+        action = {"type": "mouse"}
+        action.update({key: value for key, value in data.items() if key != "cmd"})
+        return send_mouse_action(action, self.mouse, self.log)

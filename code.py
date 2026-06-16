@@ -76,9 +76,9 @@ except Exception as e:
 # Command Handler Setup        #
 ###############################
 # Instantiate the command handler
-command_handler = CommandHandler(keyboard, layout, macros, log)
+command_handler = CommandHandler(keyboard, layout, macros, log, mouse=mouse)
 
-def run_boot_sequence(config, log, macros, keyboard, layout, led, boot_btn):
+def run_boot_sequence(config, log, macros, keyboard, layout, mouse, led, boot_btn):
     """
     Run the boot macro sequence with interruptible delay.
     """
@@ -101,7 +101,7 @@ def run_boot_sequence(config, log, macros, keyboard, layout, led, boot_btn):
             log.info("Boot sequence cancelled by user.")
         else:
             log.info(f"Executing boot macro: {boot_macro}")
-            run_macro(boot_macro, macros, keyboard, layout, log)
+            run_macro(boot_macro, macros, keyboard, layout, mouse, log)
 
 def handle_led_heartbeat(led, log, led_counter, led_counter_max, led_state):
     """
@@ -149,7 +149,7 @@ def main() -> None:
     jiggle_counter_max: int = config.get_config("mouse_jiggler_interval_ms", MOUSE_JIGGLER_DEFAULT_INTERVAL_MS)
 
     # Run boot sequence
-    run_boot_sequence(config, log, macros, keyboard, layout, led, boot_btn)
+    run_boot_sequence(config, log, macros, keyboard, layout, mouse, led, boot_btn)
 
     while True:
         chunk = uart.read()
